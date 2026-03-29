@@ -1,7 +1,7 @@
 from models import db
 from sqlalchemy.orm import sessionmaker, Session
 
-def get_session():
+def pegar_sessao():
     """
         Get a db session and returns it
     """
