@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from models import Usuario
 from dependencies import get_session, Session
 from main import bcrypt_context
@@ -17,7 +17,7 @@ async def registrar_usuario(nome: str, email: str, senha: str, session: Session 
     usuario = session.query(Usuario).filter(Usuario.email == email).first()
 
     if usuario:
-        return {"message":"user already registered"}
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Usuário já Cadastrado!")
 
     senha_critpografada = bcrypt_context.hash(senha)
 
