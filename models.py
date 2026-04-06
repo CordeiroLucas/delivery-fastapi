@@ -1,9 +1,18 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, Float
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    String,
+    Boolean,
+    ForeignKey,
+    Float,
+)
 from sqlalchemy.orm import declarative_base, DeclarativeBase
 
 db = create_engine("sqlite:///banco.db")
 
 Base: DeclarativeBase = declarative_base()
+
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -24,7 +33,7 @@ class Usuario(Base):
 
     def __repr__(self):
         return f"<Usuario: {self.email}>"
-    
+
 
 class Pedido(Base):
     __tablename__ = "pedidos"
@@ -32,7 +41,7 @@ class Pedido(Base):
     STATUS_PEDIDOS = (
         ("PENDENTE", "PENDENTE"),
         ("CANCELADO", "CANCELADO"),
-        ("FINALIZADO", "FINALIZADO")
+        ("FINALIZADO", "FINALIZADO"),
     )
 
     id: int = Column("id", Integer, primary_key=True, autoincrement=True)
@@ -45,6 +54,7 @@ class Pedido(Base):
         self.preco = preco
         self.status = status
 
+
 class ItemPedido(Base):
     __tablename__ = "itens_pedido"
 
@@ -55,7 +65,6 @@ class ItemPedido(Base):
     preco_unitario: str = Column("preco_unitario", String)
     pedido: str = Column("pedido", ForeignKey("pedidos.id"))
 
-    
     def __init__(self, quantidade, sabor, tamanho, preco_unitario, pedido):
         self.quantidade = quantidade
         self.sabor = sabor
