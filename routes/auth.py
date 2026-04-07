@@ -3,7 +3,8 @@ from models import Usuario
 from dependencies import pegar_sessao, Session, verificar_token
 from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 from schemas import UsuarioSchema, LoginSchema
-from jose import jwt, JWTError
+from jose import jwt
+from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta, timezone
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
@@ -53,12 +54,12 @@ async def registrar_usuario(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário já Cadastrado!"
         )
 
-    senha_critpografada = bcrypt_context.hash(usuario_schema.senha)
+    senha_criptografada = bcrypt_context.hash(usuario_schema.senha)
 
     novo_usuario = Usuario(
         usuario_schema.nome,
         usuario_schema.email,
-        senha_critpografada,
+        senha_criptografada,
         usuario_schema.ativo,
         usuario_schema.admin,
     )
@@ -66,7 +67,7 @@ async def registrar_usuario(
     session.commit()
 
     return {
-        "message": f"{usuario_schema.nome}, {usuario_schema.email}, {senha_critpografada} - Registrado com sucesso!"
+        "message": f"{usuario_schema.nome}, {usuario_schema.email}, {senha_criptografada} - Registrado com sucesso!"
     }
 
 
@@ -85,15 +86,32 @@ async def login(login_schema: LoginSchema, session: Session = Depends(pegar_sess
     refresh_token = criar_token(usuario.id, duracao_token=timedelta(days=7))
 
     return {
-        "access-token": access_token,
-        "refresh-token": refresh_token,
-        "token-type": "Bearer",
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "Bearer",
     }
 
+@auth_router.post("/login-form")
+async def login_form(dados_formulario: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(pegar_sessao)):
+
+    usuario = autenticar_usuario(dados_formulario.username, dados_formulario.password, session)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuario Não Encontrado ou Credenciais Incorreto!",
+        )
+
+    access_token = criar_token(usuario.id)
+
+    return {
+        "access_token": access_token,
+        "token_type": "Bearer",
+    }
 
 @auth_router.get("/refresh")
 async def use_refresh_token(usuario: Usuario = Depends(verificar_token)):
 
     access_token = criar_token(usuario.id)
 
-    return {"access-token": access_token, "token-type": "Bearer"}
+    return {"access_token": access_token, "token_type": "Bearer"}
