@@ -22,7 +22,7 @@ def verificar_token(
 ):
     try:
         dic_info = jwt.decode(token, SECRET_KEY, ALGORITHM)
-        id_usuario = dic_info.get("sub", 0)
+        id_usuario = int(dic_info.get("sub"))
 
     except JWTError:
         raise HTTPException(
