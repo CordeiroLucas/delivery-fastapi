@@ -21,7 +21,3 @@ from routes.orders import order_router
 
 app.include_router(auth_router)
 app.include_router(order_router)
-
-# @app.get("/")
-# async def root():
-#     return {"hello":"world"}
