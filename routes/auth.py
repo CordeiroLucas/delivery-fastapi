@@ -21,7 +21,7 @@ def criar_token(
     return jwt_codificado
 
 
-def autenticar_usuario(email, senha, session: Session):
+def autenticar_usuario(email: str, senha: str, session: Session):
     usuario = session.query(Usuario).filter(Usuario.email == email).first()
 
     if not usuario:
@@ -91,10 +91,16 @@ async def login(login_schema: LoginSchema, session: Session = Depends(pegar_sess
         "token_type": "Bearer",
     }
 
-@auth_router.post("/login-form")
-async def login_form(dados_formulario: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(pegar_sessao)):
 
-    usuario = autenticar_usuario(dados_formulario.username, dados_formulario.password, session)
+@auth_router.post("/login-form")
+async def login_form(
+    dados_formulario: OAuth2PasswordRequestForm = Depends(),
+    session: Session = Depends(pegar_sessao),
+):
+
+    usuario = autenticar_usuario(
+        dados_formulario.username, dados_formulario.password, session
+    )
 
     if not usuario:
         raise HTTPException(
@@ -108,6 +114,7 @@ async def login_form(dados_formulario: OAuth2PasswordRequestForm = Depends(), se
         "access_token": access_token,
         "token_type": "Bearer",
     }
+
 
 @auth_router.get("/refresh")
 async def use_refresh_token(usuario: Usuario = Depends(verificar_token)):
