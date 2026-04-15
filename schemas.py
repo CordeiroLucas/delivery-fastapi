@@ -31,6 +31,5 @@ class ItemPedidoSchema(BaseModel):
     sabor: str
     tamanho: str
     preco_unitario: float
-    pedido: int
 
     model_config = ConfigDict(from_attributes=True)
